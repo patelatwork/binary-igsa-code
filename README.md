@@ -17,7 +17,7 @@ pandas
 matplotlib
 
 How to Get Started?
-git clone https://github.com/yourusername/binary-igsa-code.git
+git clone https://github.com/patelatwork/binary-igsa-code.git
 Run test.py
 
 That's It
