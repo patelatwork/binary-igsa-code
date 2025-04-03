@@ -19,6 +19,8 @@ How to Get Started?
 git clone https://github.com/patelatwork/binary-igsa-code.git
 Run test.py
 
+you can also see 3-d visualization of iterations,features and accuracy 
+Run countor-visualization.py
 That's It
 
 
