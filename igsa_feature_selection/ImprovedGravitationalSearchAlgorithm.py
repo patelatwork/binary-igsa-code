@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
@@ -27,6 +28,13 @@ class ImprovedGravitationalSearchAlgorithm:
         # Global best solution
         self.gbest = None
         self.gbest_fitness = float('-inf')
+        
+        # Tracking performance metrics for visualization
+        self.best_fitness_history = []
+        self.avg_fitness_history = []
+        self.feature_count_history = []
+        self.exploration_coefficient_history = []
+        self.kbest_history = []
     
     def calculate_mass(self, fitness_values):
         """
@@ -145,6 +153,13 @@ class ImprovedGravitationalSearchAlgorithm:
                 prob = np.abs(np.tanh(self.velocities[i][d]))
                 if np.random.rand() < prob:
                     self.population[i][d] = 1 - self.population[i][d]
+        
+        # Store metrics for visualization
+        self.best_fitness_history.append(self.gbest_fitness)
+        self.avg_fitness_history.append(np.mean(fitness_values))
+        self.feature_count_history.append(np.sum(self.gbest))
+        self.exploration_coefficient_history.append(c1)
+        self.kbest_history.append(kbest)
     
     def feature_selection(self, X, y):
         """
@@ -167,4 +182,51 @@ class ImprovedGravitationalSearchAlgorithm:
         
         # Return selected features
         return self.gbest == 1
-
+    
+    def plot_convergence(self, dataset_name=""):
+        """
+        Plot the convergence of the algorithm for various metrics
+        
+        Parameters:
+        - dataset_name: Name of the dataset for the plot titles
+        """
+        # Create a figure with multiple subplots
+        fig, axs = plt.subplots(3, 1, figsize=(12, 15))
+        fig.suptitle(f'IGSA Convergence Metrics - {dataset_name}', fontsize=16)
+        
+        # Plot 1: Fitness values over iterations
+        iterations = range(1, len(self.best_fitness_history) + 1)
+        axs[0].plot(iterations, self.best_fitness_history, 'b-', label='Best Fitness')
+        axs[0].plot(iterations, self.avg_fitness_history, 'r--', label='Average Fitness')
+        axs[0].set_xlabel('Iteration')
+        axs[0].set_ylabel('Fitness Value')
+        axs[0].set_title('Fitness Convergence')
+        axs[0].legend()
+        axs[0].grid(True)
+        
+        # Plot 2: Feature count over iterations
+        axs[1].plot(iterations, self.feature_count_history, 'g-')
+        axs[1].set_xlabel('Iteration')
+        axs[1].set_ylabel('Number of Selected Features')
+        axs[1].set_title('Feature Selection Convergence')
+        axs[1].grid(True)
+        
+        # Plot 3: Exploration coefficient and Kbest
+        ax3_twin = axs[2].twinx()
+        axs[2].plot(iterations, self.exploration_coefficient_history, 'b-', label='Exploration Coefficient (c1)')
+        ax3_twin.plot(iterations, self.kbest_history, 'r--', label='Kbest')
+        
+        axs[2].set_xlabel('Iteration')
+        axs[2].set_ylabel('Exploration Coefficient')
+        ax3_twin.set_ylabel('Kbest Value')
+        axs[2].set_title('Algorithm Parameters Over Time')
+        
+        # Add legends to both y-axes
+        lines1, labels1 = axs[2].get_legend_handles_labels()
+        lines2, labels2 = ax3_twin.get_legend_handles_labels()
+        ax3_twin.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+        axs[2].grid(True)
+        
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.92)
+        return fig
